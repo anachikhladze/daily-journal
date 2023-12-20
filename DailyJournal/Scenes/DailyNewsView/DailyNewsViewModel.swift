@@ -8,6 +8,8 @@
 import Foundation
 
 final class DailyNewsViewModel: ObservableObject {
+    
+    // MARK: - Properties
     @Published var title = ""
     @Published var newsText = ""
     @Published var creationDate = Date()
@@ -18,6 +20,7 @@ final class DailyNewsViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Initialization
     init() {
         if let savedEntries = UserDefaults.standard.array(forKey: "SavedEntries") as? [[String: String]] {
             self.entries = savedEntries
@@ -26,6 +29,7 @@ final class DailyNewsViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Methods
     func saveButtonPressed() {
         if title.count > 5 && newsText.count > 5 {
             entries.append(["title": title, "text": newsText])
@@ -44,4 +48,3 @@ final class DailyNewsViewModel: ObservableObject {
         entries.remove(atOffsets: index)
     }
 }
-

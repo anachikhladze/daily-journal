@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct DailyNewsView: View {
-        
+    
+    // MARK: - Properties
     @StateObject private var viewModel = DailyNewsViewModel()
     
     private var dateFormatter: DateFormatter {
@@ -17,11 +18,12 @@ struct DailyNewsView: View {
         return formatter
     }
     
+    // MARK: - Body
     var body: some View {
         NavigationStack {
             VStack(spacing: 10) {
                 formView
-                listView
+                listOrEmptyView
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -32,14 +34,11 @@ struct DailyNewsView: View {
                 }
             }
             .navigationTitle("Daily Journal")
-            .alert("Enty can't be saved", isPresented: $viewModel.showRequirementsAlert) {
-                // ok button
-            } message: {
-                Text("Your title and text must contain at least 5 characters!")
-            }
+            .alert(isPresented: $viewModel.showRequirementsAlert , content: {
+                requirementsAlert
+            })
         }
     }
-    
     
     private var formView: some View {
         Form {
@@ -55,33 +54,13 @@ struct DailyNewsView: View {
         }
     }
     
-    private var listView: some View {
+    private var listOrEmptyView: some View {
         Group {
             if viewModel.entries.isEmpty {
                 emptyListView
             } else {
-                List {
-                    ForEach($viewModel.entries.indices, id: \.self) { index in
-                        HStack {
-                            Text(viewModel.entries[index]["title"] ?? "")
-                            Text(viewModel.entries[index]["text"] ?? "")
-                            
-                            Spacer()
-                            Text(dateFormatter.string(from: viewModel.creationDate))
-                        }
-                    }
-                    .onMove(perform: viewModel.editPressed)
-                    .onDelete(perform: viewModel.deletePressed)
-                }
+                listView
             }
-        }
-    }
-
-    private var saveButton: some View {
-        Button(action: {
-            viewModel.saveButtonPressed()
-        }) {
-            Text("Save")
         }
     }
     
@@ -91,9 +70,41 @@ struct DailyNewsView: View {
             .aspectRatio(contentMode: .fill)
             .frame(width: 300, height: 300)
     }
+    
+    private var listView: some View {
+        List {
+            ForEach($viewModel.entries.indices, id: \.self) { index in
+                HStack {
+                    Text(viewModel.entries[index]["title"] ?? "")
+                    Text(viewModel.entries[index]["text"] ?? "")
+                    
+                    Spacer()
+                    Text(dateFormatter.string(from: viewModel.creationDate))
+                }
+            }
+            .onMove(perform: viewModel.editPressed)
+            .onDelete(perform: viewModel.deletePressed)
+        }
+    }
+    
+    private var saveButton: some View {
+        Button(action: {
+            viewModel.saveButtonPressed()
+        }) {
+            Text("Save")
+        }
+    }
+    
+    private var requirementsAlert: Alert {
+        Alert(
+            title: Text("Entry can't be saved!"),
+            message: Text("Your title and text must contain at least 5 characters!"),
+            dismissButton: .default(Text("Dismiss")))
+    }
 }
 
 
+// MARK: - Preview
 #Preview {
     DailyNewsView()
 }
